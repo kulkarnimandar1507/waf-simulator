@@ -18,20 +18,30 @@ from waf.middleware import (
     log_request, reset_brute_force
 )
 
+# -------------------------------------------------------------------
+# Absolute paths (works locally, on Render, on PythonAnywhere)
+# -------------------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+INSTANCE_DIR = os.path.join(BASE_DIR, 'instance')
+DB_PATH = os.path.join(INSTANCE_DIR, 'waf.db')
+
+# Ensure instance folder exists before anything else
+os.makedirs(INSTANCE_DIR, exist_ok=True)
+
 app = Flask(__name__)
-app.secret_key = 'waf-simulator-secret-key-change-in-production'
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
 
 WAF_STATE = {'enabled': True}
 
 
 def get_db():
-    conn = sqlite3.connect('instance/waf.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 
 def init_db():
-    os.makedirs('instance', exist_ok=True)
+    os.makedirs(INSTANCE_DIR, exist_ok=True)
     conn = get_db()
     c = conn.cursor()
 
@@ -87,13 +97,11 @@ def init_db():
 
     conn.commit()
     conn.close()
-    print("[WAF] Database initialized.")
+    print("[WAF] Database initialized at", DB_PATH)
 
 
 @app.before_request
 def run_waf():
-    # Skip only static files and monitoring/control pages.
-    # /login and /site/login are NOT skipped — so the WAF can trigger brute-force blocking.
     skip = ['/dashboard', '/traffic', '/inspector', '/terminal',
             '/signup', '/logout', '/waf-control', '/toggle-waf', '/reset-brute-force']
     if request.path.startswith('/static') or request.path in skip:
@@ -155,7 +163,7 @@ def toggle_waf():
 
 @app.route('/reset-brute-force', methods=['POST'])
 def reset_brute_force_route():
-    reset_brute_force()  # resets the in-memory counter for all IPs
+    reset_brute_force()
     flash('Brute force counter reset. You can now demo attacks again.', 'success')
     return redirect(url_for('waf_control'))
 
@@ -353,7 +361,6 @@ def site_login():
 
         conn = get_db()
 
-        # SQL injection bypass — only when WAF is off
         if not WAF_STATE['enabled']:
             if ("' or " in username.lower() or
                 " or 1=1" in username.lower() or
@@ -409,6 +416,10 @@ def site_feedback():
                            waf_enabled=WAF_STATE['enabled'])
 
 
+# -------------------------------------------------------------------
+# Run
+# -------------------------------------------------------------------
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)

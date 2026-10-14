@@ -4,9 +4,16 @@ Intercepts every request, inspects for attacks, logs ALL requests.
 """
 
 import sqlite3
+import os
 from datetime import datetime
 from flask import request
 from .rules import inspect
+
+# -------------------------------------------------------------------
+# Absolute DB path (must match app.py)
+# -------------------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, 'instance', 'waf.db')
 
 # In-memory brute force tracker
 FAILED_LOGINS = {}
@@ -14,7 +21,7 @@ BRUTE_FORCE_THRESHOLD = 5
 
 
 def _log_request_row(ip, method, path, payload, verdict, attack_type, matched_rule):
-    conn = sqlite3.connect('instance/waf.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
         """INSERT INTO request_log
@@ -29,7 +36,7 @@ def _log_request_row(ip, method, path, payload, verdict, attack_type, matched_ru
 
 
 def _log_attack_row(ip, attack_type, payload, path):
-    conn = sqlite3.connect('instance/waf.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
         """INSERT INTO attack_logs (ip, attack_type, payload, path, timestamp)
