@@ -22,7 +22,7 @@ A rule-based Web Application Firewall that detects and blocks SQL Injection, XSS
 pip install -r requirements.txt
 python app.py
 
-Open http://127.0.0.1:5000
+Open https://waf-simulator-etcj.onrender.com/
 
 ## Demo
 1. Visit /site/ — target ShopEase site
