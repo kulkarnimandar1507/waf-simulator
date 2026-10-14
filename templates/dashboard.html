@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🛡️ WAF Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Attacks Blocked</h3>
+        <p class="big">{{ total_attacks }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>SQL Injection</h3>
+        <p class="big">{{ sqli }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>XSS</h3>
+        <p class="big">{{ xss }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Path Traversal</h3>
+        <p class="big">{{ traversal }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Brute Force</h3>
+        <p class="big">{{ bruteforce }}</p>
+    </div>
+</div>
+
+<h2>Recent Attack Logs</h2>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Source IP</th><th>Attack Type</th>
+                <th>Path</th><th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log['id'] }}</td>
+                <td>{{ log['ip'] }}</td>
+                <td><span class="badge">{{ log['attack_type'] }}</span></td>
+                <td>{{ log['path'] }}</td>
+                <td>{{ log['timestamp'] }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align:center;">No attacks logged yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form method="POST" action="{{ url_for('clear_logs') }}" style="margin-top: 20px;">
+    <button class="btn btn-danger" onclick="return confirm('Clear all logs?')">Clear Logs</button>
+</form>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>💻 Attack Terminal</h1>
+<p class="subtitle">Type curl commands to send requests through the WAF — just like a real attacker.</p>
+
+<div class="card">
+    <form method="POST">
+        <label>Enter a curl command:</label>
+        <input type="text" name="command"
+               value="{{ output.command if output and output.command else '' }}"
+               placeholder='curl "http://127.0.0.1:5000/site/search?q=hello"'
+               style="font-family:monospace;"
+               autocomplete="off">
+        <button type="submit" class="btn">Run Command</button>
+    </form>
+</div>
+
+{% if output %}
+    {% if output.error %}
+    <div class="card" style="background:#7f1d1d;">
+        <p>❌ {{ output.error }}</p>
+    </div>
+    {% else %}
+    <div class="card" style="font-family:monospace;font-size:0.9rem;">
+        <p style="color:#94a3b8;">$ {{ output.command }}</p>
+        <hr style="border-color:#334155;margin:0.8rem 0;">
+        <p><strong>URL:</strong> {{ output.url }}</p>
+        <p><strong>Path:</strong> {{ output.path }}</p>
+        <p><strong>Query:</strong> {{ output.query or '(none)' }}</p>
+        <p><strong>WAF Verdict:</strong>
+            {% if output.verdict == 'BLOCKED' %}
+                <span style="color:#f87171;font-weight:bold;">🚫 BLOCKED</span>
+            {% else %}
+                <span style="color:#4ade80;font-weight:bold;">✅ ALLOWED</span>
+            {% endif %}
+        </p>
+        {% if output.attack_type %}
+        <p><strong>Attack Type:</strong> {{ output.attack_type }}</p>
+        <p><strong>Matched Rule:</strong> <code>{{ output.matched_rule }}</code></p>
+        {% endif %}
+    </div>
+    {% endif %}
+{% endif %}
+
+<div class="card" style="margin-top:2rem;">
+    <h3>Try these commands (click to copy):</h3>
+    <ul style="margin-left:20px;line-height:2.2;">
+        <li><code>curl "http://127.0.0.1:5000/site/search?q=mouse"</code> → ✅ ALLOWED</li>
+        <li><code>curl "http://127.0.0.1:5000/site/search?q=' OR '1'='1"</code> → 🚫 SQL Injection</li>
+        <li><code>curl "http://127.0.0.1:5000/site/search?q=&lt;script&gt;alert(1)&lt;/script&gt;"</code> → 🚫 XSS</li>
+        <li><code>curl "http://127.0.0.1:5000/site/search?q=../../etc/passwd"</code> → 🚫 Path Traversal</li>
+        <li><code>curl "http://127.0.0.1:5000/site/search?q=hello UNION SELECT password FROM users"</code> → 🚫 SQL Injection</li>
+    </ul>
+</div>
+{% endblock %}

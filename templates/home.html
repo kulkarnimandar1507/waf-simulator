@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Web Application Firewall Simulator</h1>
+<p class="subtitle">Detects and blocks common web attacks in real-time.</p>
+
+<div class="grid">
+    <div class="card">
+        <h2>🔍 Try a Safe Search</h2>
+        <form method="GET" action="/search">
+            <input type="text" name="q" placeholder="Search something...">
+            <button type="submit" class="btn">Search</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>💥 Simulate an Attack</h2>
+        <p>Click to send a malicious request. The WAF will block it.</p>
+
+        <form method="GET" action="/search">
+            <input type="hidden" name="q" value="' OR '1'='1">
+            <button type="submit" class="btn btn-danger">SQL Injection</button>
+        </form>
+
+        <form method="GET" action="/search">
+            <input type="hidden" name="q" value="<script>alert('XSS')</script>">
+            <button type="submit" class="btn btn-danger">XSS Attack</button>
+        </form>
+
+        <form method="GET" action="/search">
+            <input type="hidden" name="q" value="../../etc/passwd">
+            <button type="submit" class="btn btn-danger">Path Traversal</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>🔐 Brute Force Test</h2>
+        <p>Go to <a href="{{ url_for('login') }}">Login</a> and try wrong credentials 5+ times to trigger brute-force detection.</p>
+    </div>
+</div>
+{% endblock %}

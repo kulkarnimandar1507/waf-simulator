@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🛒 ShopEase — Search Results</h1>
+<p>Search query: <strong>{{ query }}</strong></p>
+
+{% if sqli_success %}
+<div class="card" style="background:#7f1d1d;border-left:4px solid #f87171;">
+    <h3 style="color:#fecaca;">⚠️ SQL Injection SUCCESSFUL!</h3>
+    <p style="color:#fecaca;">The attacker bypassed the search filter and dumped the entire database.</p>
+</div>
+
+<h2 style="margin-top:2rem;">📦 All Products (Dumped)</h2>
+<div class="grid">
+    {% for p in products %}
+    <div class="card"><h3>{{ p['name'] }}</h3><p>₹{{ p['price'] }}</p></div>
+    {% endfor %}
+</div>
+
+<h2 style="margin-top:2rem;">🔐 All Users (Dumped)</h2>
+<div class="table-wrap">
+    <table>
+        <thead><tr><th>Username</th><th>Password</th></tr></thead>
+        <tbody>
+            {% for u in users %}
+            <tr><td>{{ u['username'] }}</td><td>{{ u['password'] }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="grid" style="margin-top:2rem;">
+    {% for p in products %}
+    <div class="card">
+        <h3>{{ p['name'] }}</h3>
+        <p style="color:#38bdf8;font-weight:bold;">₹{{ p['price'] }}</p>
+        <a href="/site/product/{{ p['id'] }}" class="btn">View</a>
+    </div>
+    {% else %}
+    <p>No products found for "<strong>{{ query }}</strong>".</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div style="margin-top:2rem;">
+    <a href="/site/" class="btn">← Back to Shop</a>
+</div>
+{% endblock %}

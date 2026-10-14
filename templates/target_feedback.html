@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:700px;margin:2rem auto;">
+    <h2>💬 ShopEase Feedback</h2>
+
+    {% if waf_enabled %}
+        <p style="color:#4ade80;font-size:0.9rem;">🛡️ WAF is ON — malicious payloads will be blocked.</p>
+    {% else %}
+        <p style="color:#f87171;font-size:0.9rem;">🚨 WAF is OFF — the app is unprotected. Stored XSS is possible.</p>
+    {% endif %}
+
+    <form method="POST">
+        <label>Your Name</label>
+        <input type="text" name="name" required>
+
+        <label>Message</label>
+        <input type="text" name="message" required>
+
+        <button type="submit" class="btn">Submit</button>
+    </form>
+
+    <div style="margin-top:1.5rem;padding:1rem;background:#0f172a;border-radius:8px;border:1px solid #334155;">
+        <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:0.5rem;"><strong>Try XSS:</strong></p>
+        <ul style="margin-left:20px;color:#cbd5e1;font-size:0.85rem;line-height:1.8;">
+            <li>Message: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></li>
+        </ul>
+        <p style="color:#94a3b8;font-size:0.8rem;margin-top:0.5rem;">Turn WAF OFF to store it, then ON to see it blocked.</p>
+    </div>
+</div>
+
+<h2>Recent Feedback</h2>
+<div class="card">
+    {% for f in feedback_list %}
+    <div style="border-bottom:1px solid #334155;padding:0.5rem 0;">
+        <strong>{{ f['name'] }}</strong>:
+        {% if waf_enabled %}
+            {{ f['message'] }}
+        {% else %}
+            {{ f['message'] | safe }}
+        {% endif %}
+    </div>
+    {% else %}
+    <p style="color:#94a3b8;">No feedback yet.</p>
+    {% endfor %}
+</div>
+
+<div style="margin-top:1rem;">
+    <a href="/site/" class="btn">← Back to Shop</a>
+</div>
+{% endblock %}

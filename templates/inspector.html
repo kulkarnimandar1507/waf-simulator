@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🔬 WAF Inspector</h1>
+<p class="subtitle">Type any payload to see how the WAF evaluates it against its rules.</p>
+
+<div class="card" style="max-width:700px;">
+    <form method="POST">
+        <label>Enter a payload to test:</label>
+        <input type="text" name="payload" placeholder="e.g. ' OR '1'='1" required>
+        <button type="submit" class="btn">Inspect</button>
+    </form>
+
+    {% if result %}
+    <div style="margin-top:1.5rem; padding:1rem; border-radius:8px;
+                background: {% if result.verdict == 'BLOCKED' %}#7f1d1d{% else %}#14532d{% endif %};">
+        <h3>Verdict: {{ result.verdict }}</h3>
+        {% if result.attack_type %}
+        <p><strong>Attack Type:</strong> {{ result.attack_type }}</p>
+        <p><strong>Matched Rule:</strong> <code>{{ result.matched_rule }}</code></p>
+        {% else %}
+        <p>The payload is safe. No rule matched.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="card" style="margin-top:1.5rem; max-width:700px;">
+    <h3>Try these:</h3>
+    <ul style="margin-left:20px; line-height:2;">
+        <li><code>' OR '1'='1</code> → SQL Injection</li>
+        <li><code>&lt;script&gt;alert(1)&lt;/script&gt;</code> → XSS</li>
+        <li><code>../../etc/passwd</code> → Path Traversal</li>
+        <li><code>hello world</code> → Safe (Allowed)</li>
+    </ul>
+</div>
+{% endblock %}

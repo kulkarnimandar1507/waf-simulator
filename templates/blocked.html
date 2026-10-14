@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="blocked-box">
+    <h1>🚫 Request Blocked by WAF</h1>
+    <p class="attack-type">Attack Type: <strong>{{ attack_type }}</strong></p>
+
+    {% if matched_rule %}
+    <div class="rule-box">
+        <p><strong>Matched Rule:</strong> <code>{{ matched_rule }}</code></p>
+    </div>
+    {% endif %}
+
+    <h3 style="margin-top:1.5rem;color:#f87171;">📡 Raw HTTP Request Intercepted</h3>
+    <pre class="payload-box">{{ method }} {{ path }}{% if query %}?{{ query }}{% endif %} HTTP/1.1
+Host: 127.0.0.1:5000
+User-Agent: {{ headers.get('User-Agent', 'Unknown') }}
+Accept: {{ headers.get('Accept', 'Unknown') }}
+X-Forwarded-For: {{ ip }}</pre>
+
+    <p style="margin-top:1rem;">The request never reached the target application.</p>
+    <a href="{{ url_for('home') }}" class="btn">← Back to Home</a>
+    <a href="{{ url_for('traffic') }}" class="btn">View Traffic Log</a>
+</div>
+{% endblock %}

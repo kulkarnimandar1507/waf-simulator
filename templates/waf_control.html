@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>⚙️ WAF Control Panel</h1>
+<p class="subtitle">Toggle the Web Application Firewall and manage demo state.</p>
+
+<div class="card" style="text-align:center;padding:2rem;">
+    {% if waf_enabled %}
+    <h2 style="color:#4ade80;">🛡️ WAF is ENABLED</h2>
+    <p style="color:#94a3b8;margin:1rem 0;">All incoming requests are being inspected. Malicious traffic is being blocked.</p>
+    {% else %}
+    <h2 style="color:#f87171;">🚨 WAF is DISABLED</h2>
+    <p style="color:#94a3b8;margin:1rem 0;">The WAF is bypassed. All attacks will reach the target application.</p>
+    {% endif %}
+
+    <form method="POST" action="/toggle-waf" style="margin-top:1.5rem;display:inline-block;">
+        <button type="submit" class="btn {% if waf_enabled %}btn-danger{% endif %}"
+                style="font-size:1.1rem;padding:1rem 2rem;">
+            {% if waf_enabled %}🔓 Disable WAF{% else %}🔒 Enable WAF{% endif %}
+        </button>
+    </form>
+
+    <form method="POST" action="/reset-brute-force" style="margin-top:1.5rem;display:inline-block;margin-left:0.5rem;">
+        <button type="submit" class="btn" style="font-size:1.1rem;padding:1rem 2rem;background:#7c3aed;">
+            🔄 Reset Brute Force Counter
+        </button>
+    </form>
+</div>
+
+<div class="card" style="margin-top:2rem;">
+    <h3>🎬 Demo Instructions</h3>
+    <ol style="margin-left:20px;line-height:2;">
+        <li><strong>Disable WAF</strong> (click the button above).</li>
+        <li>Go to <a href="/site/login">/site/login</a>.</li>
+        <li>Enter username <code>' OR '1'='1</code> and any password.</li>
+        <li>See: <span style="color:#f87171;">⚠️ SQL Injection SUCCESSFUL</span> — the attacker got in!</li>
+        <li><strong>Enable WAF</strong> again.</li>
+        <li>Repeat the same attack → blocked as SQL Injection.</li>
+        <li>Try 6 wrong logins → blocked as Brute Force.</li>
+        <li>Click <strong>Reset Brute Force Counter</strong> to unblock and continue demoing.</li>
+    </ol>
+</div>
+
+<div style="margin-top:2rem;">
+    <a href="/" class="btn">← Back to Home</a>
+</div>
+{% endblock %}
