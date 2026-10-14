@@ -32,4 +32,4 @@ Open http://127.0.0.1:5000
 5. Visit /dashboard — attack statistics
 
 ## Author
-Your Name — Final Year Project
+Mandar Kulkarni — Final Year Project
