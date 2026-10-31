@@ -1,7 +1,3 @@
-"""
-WAF Simulator — Main Flask Application
-"""
-
 import sqlite3
 import os
 from datetime import datetime
@@ -18,9 +14,6 @@ from waf.middleware import (
     log_request, reset_brute_force
 )
 
-# -------------------------------------------------------------------
-# Absolute paths (works locally, on Render, on PythonAnywhere)
-# -------------------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INSTANCE_DIR = os.path.join(BASE_DIR, 'instance')
 DB_PATH = os.path.join(INSTANCE_DIR, 'waf.db')
@@ -139,10 +132,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
-
-# -------------------------------------------------------------------
-# WAF Control Panel
-# -------------------------------------------------------------------
 @app.route('/')
 def home():
     return render_template('home.html', waf_enabled=WAF_STATE['enabled'])
@@ -306,10 +295,6 @@ def clear_logs():
     return redirect(url_for('dashboard'))
 
 
-# ===================================================================
-# TARGET WEB APPLICATION (ShopEase)
-# ===================================================================
-
 @app.route('/site/')
 def site_home():
     conn = get_db()
@@ -415,11 +400,6 @@ def site_feedback():
                            feedback_list=feedback_list,
                            waf_enabled=WAF_STATE['enabled'])
 
-
-# -------------------------------------------------------------------
-# Run
-# -------------------------------------------------------------------
-# Run init_db() on module import (works under Gunicorn too)
 init_db()
 
 if __name__ == '__main__':
