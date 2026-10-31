@@ -1,12 +1,5 @@
-"""
-WAF Detection Rules
-Detects SQL Injection, XSS, Path Traversal, and Command Injection patterns.
-Each rule returns the matched pattern so we can show WHY it was blocked.
-"""
-
 import re
 
-# Rule sets — each entry is (name, pattern)
 SQL_RULES = [
     ("SQL Injection", r"' OR '1'='1"),
     ("SQL Injection", r"' OR 1=1"),
@@ -51,10 +44,6 @@ ALL_RULES = SQL_RULES + XSS_RULES + TRAVERSAL_RULES + CMD_RULES
 
 
 def inspect(payload: str):
-    """
-    Inspect payload against all rules.
-    Returns (attack_type, matched_rule) or (None, None) if safe.
-    """
     if not payload:
         return None, None
 
