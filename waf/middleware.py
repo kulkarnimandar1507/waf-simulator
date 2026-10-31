@@ -1,21 +1,12 @@
-"""
-WAF Middleware
-Intercepts every request, inspects for attacks, logs ALL requests.
-"""
-
 import sqlite3
 import os
 from datetime import datetime
 from flask import request
 from .rules import inspect
 
-# -------------------------------------------------------------------
-# Absolute DB path (must match app.py)
-# -------------------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, 'instance', 'waf.db')
 
-# In-memory brute force tracker
 FAILED_LOGINS = {}
 BRUTE_FORCE_THRESHOLD = 5
 
@@ -67,21 +58,10 @@ def reset_brute_force(ip=None):
 
 
 def waf_check():
-    """
-    Called before every request.
-    Returns (attack_type, matched_rule) if blocked, else (None, None).
-
-    Order of inspection:
-      1. Payload inspection (SQLi, XSS, Path Traversal) — most specific
-      2. Brute force check — falls back only if no payload attack found
-    """
     ip = request.remote_addr
     method = request.method
     path = request.path
 
-    # -------------------------------------------------
-    # 1. PAYLOAD INSPECTION FIRST (SQLi, XSS, etc.)
-    # -------------------------------------------------
     parts = [request.full_path]
     for key, value in request.args.items():
         parts.append(f"{key}={value}")
@@ -99,9 +79,6 @@ def waf_check():
         log_request(ip, method, path, combined, "BLOCKED", attack_type, matched_rule)
         return attack_type, matched_rule
 
-    # -------------------------------------------------
-    # 2. BRUTE FORCE CHECK (only if no payload attack)
-    # -------------------------------------------------
     if method == 'POST' and path in ('/login', '/site/login'):
         attempts = FAILED_LOGINS.get(ip, 0)
         if attempts >= BRUTE_FORCE_THRESHOLD:
@@ -110,9 +87,6 @@ def waf_check():
                         "BLOCKED", "Brute Force", f"{BRUTE_FORCE_THRESHOLD}+ failed logins")
             return "Brute Force", f"{BRUTE_FORCE_THRESHOLD}+ failed logins"
 
-    # -------------------------------------------------
-    # 3. ALLOWED
-    # -------------------------------------------------
     print(f"[WAF] ✅ ALLOWED  | {ip} | {method} {path}")
     log_request(ip, method, path, combined, "ALLOWED", None, None)
     return None, None
